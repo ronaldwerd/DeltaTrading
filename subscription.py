@@ -11,17 +11,13 @@ To show heartbeat, replace [options] by -b or --displayHeartBeat
 import credentials
 import requests
 import json
+import v20
 
 from dateutil import parser
-from optparse import OptionParser
 from finance_objects import Quote
 
 ACCESS_HEADERS = {'Authorization': 'Bearer ' + credentials.ACCESS_TOKEN}
-
-
-def get_historical(cross, date_time, bar_count):
-
-    pass
+__ACCESS_TOKEN = ""
 
 
 def __oanda_json_to_quote(json_str):
@@ -39,6 +35,25 @@ def quote():
     pass
 
 
+def get_historical(cross, bar_count): # time_frame, date_time_start, date_time_end
+    try:
+        s = requests.Session()
+        url = "https://" + credentials.DOMAIN + "/v3/instruments/" + cross + '/candles'
+
+        params = {
+                  'granularity': 'M5',
+                  'count': bar_count}
+
+        req = requests.Request('GET', url, ACCESS_HEADERS, params=params)
+        pre = req.prepare()
+        resp = s.send(pre, stream=True, verify=True)
+        return resp
+    except Exception as e:
+        s.close()
+        print("Caught exception when connecting to stream\n" + str(e))
+    pass
+
+
 def connect_to_stream():
 
     """
@@ -46,10 +61,6 @@ def connect_to_stream():
     fxTrade (Live)              The live (real money) environment
     fxTrade Practice (Demo)     The demo (simulated money) environment
     """
-
-    # Replace the following variables with your personal values
-    access_token = '86101226aca6ccaa99f5826b5b2abb8d-41c96a6b0fb2f775e8cb86a2f413a459'
-    account_id = '6284575'
     instruments = 'GBP_JPY'
 
     try:
@@ -57,7 +68,7 @@ def connect_to_stream():
         url = "https://" + credentials.DOMAIN + "/v1/prices"
 
         params = {'instruments': instruments,
-                  'accountId': account_id}
+                  'accountId': credentials.ACCOUNT_ID}
 
         req = requests.Request('GET', url, ACCESS_HEADERS, params=params)
         pre = req.prepare()
@@ -89,18 +100,15 @@ def demo(displayHeartbeat):
 
 
 def main():
-    usage = "usage: %prog [options]"
-    parser = OptionParser(usage)
-    parser.add_option("-b", "--displayHeartBeat", dest = "verbose", action = "store_true",
-                        help = "Display HeartBeat in streaming data")
-    displayHeartbeat = False
+    api = v20.Context(
+        credentials.HOSTNAME,
+        credentials.PORT,
+        token=credentials.ACCESS_TOKEN
+    )
 
-    (options, args) = parser.parse_args()
-    if len(args) > 1:
-        parser.error("incorrect number of arguments")
-    if options.verbose:
-        displayHeartbeat = True
-    demo(displayHeartbeat)
+    r = api.instrument.candles("USD_CAD")
+
+    print("X")
 
 
 if __name__ == "__main__":
