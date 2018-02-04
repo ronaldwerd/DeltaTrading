@@ -1,5 +1,5 @@
 import wx
-
+from finance_objects import Quote
 
 APP_TITLE = 'Delta Algorithm'
 
@@ -35,6 +35,8 @@ class MainFrame(wx.Frame):
         self.Centre()
         self.Show(True)
 
+    def updateUI(self, q: Quote):
+        pass
 
 def run():
     ex = wx.App()
