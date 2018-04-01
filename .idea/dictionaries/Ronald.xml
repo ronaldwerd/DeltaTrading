@@ -8,6 +8,7 @@
       <w>menubar</w>
       <w>mongo</w>
       <w>oanda</w>
+      <w>pyglet</w>
     </words>
   </dictionary>
 </component>
