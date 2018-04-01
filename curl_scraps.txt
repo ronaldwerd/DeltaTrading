@@ -1,8 +1,6 @@
 curl \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer 7cc32e074756911abe4f8e6fab05ff73-132d260bcdee4ea4e5e07d7301a90558" \
-  "https://api-fxtrade.oanda.com/v3/instruments/EUR_USD/candles?count=6&price=M&granularity=S5"
+  "https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=6&price=M&granularity=S5"
 
-
-
-curl -H "Authorization: Bearer 7cc32e074756911abe4f8e6fab05ff73-132d260bcdee4ea4e5e07d7301a90558" https://api-fxtrade.oanda.com/v3/accounts
+curl -H "Authorization: Bearer 7cc32e074756911abe4f8e6fab05ff73-132d260bcdee4ea4e5e07d7301a90558" 	https://api-fxpractice.oanda.com/v20/accounts
