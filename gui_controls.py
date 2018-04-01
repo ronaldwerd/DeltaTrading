@@ -26,34 +26,9 @@ class PygletWXContext(gl.Context):
         pass
 
     def set_current(self):
-        # XXX not per-thread
         gl.current_context = self
-
-        # XXX
         gl.gl_info.set_active_context()
         gl.glu_info.set_active_context()
-
-        # Implement workarounds
-        if not self._info:
-            self._info = gl.gl_info.GLInfo()
-            self._info.set_active_context()
-            for attr, check in self._workaround_checks:
-                setattr(self, attr, check(self._info))
-
-        # Release textures and buffers on this context scheduled for deletion.
-        # Note that the garbage collector may introduce a race condition,
-        # so operate on a copy of the textures/buffers and remove the deleted
-        # items using list slicing (which is an atomic operation)
-        if self.object_space._doomed_textures:
-            textures = self.object_space._doomed_textures[:]
-            textures = (gl.GLuint * len(textures))(*textures)
-            gl.glDeleteTextures(len(textures), textures)
-            self.object_space._doomed_textures[0:len(textures)] = []
-        if self.object_space._doomed_buffers:
-            buffers = self.object_space._doomed_buffers[:]
-            buffers = (gl.GLuint * len(buffers))(*buffers)
-            gl.glDeleteBuffers(len(buffers), buffers)
-            self.object_space._doomed_buffers[0:len(buffers)] = []
 
 
 class PygletGLPanel(wx.Panel):
@@ -162,21 +137,12 @@ class PygletGLPanel(wx.Panel):
         self.pygletcontext.set_current()
 
     def OnInitGL(self):
-        '''Initialize OpenGL for use in the window.'''
-        # create a pyglet context for this panel
-        #self.pygletcontext = gl.Context(gl.current_context)
-        if pyglet.version > "1.1.4":
-            self.pygletcontext = PygletWXContext()
-        else:
-            self.pygletcontext = gl.Context()
         self.pygletcontext.set_current()
         # normal gl init
         gl.glEnable(gl.GL_BLEND)
         gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
         gl.glEnable(gl.GL_TEXTURE_2D)
         gl.glClearColor(201, 45, 75, 241)
-
-        # create objects to draw
         self.create_objects()
 
     def GetGLExtents(self):
@@ -188,6 +154,7 @@ class PygletGLPanel(wx.Panel):
         self.canvas.SwapBuffers()
 
     def __init__(self, parent, id, pos=wx.DefaultPosition, size=wx.DefaultSize, style=0):
+        self.pygletcontext = PygletWXContext()
         # Forcing a no full repaint to stop flickering
         style = style | wx.NO_FULL_REPAINT_ON_RESIZE
         self.FIRST_PAINT = False
@@ -195,15 +162,14 @@ class PygletGLPanel(wx.Panel):
         super(PygletGLPanel, self).__init__(parent, id, pos, size, style)
         # init gl canvas data
         self.GLinitialized = False
-        attribList = (glcanvas.WX_GL_RGBA,  # RGBA
-                      glcanvas.WX_GL_DOUBLEBUFFER,  # Double Buffered
-                      glcanvas.WX_GL_DEPTH_SIZE, 24)  # 24 bit
+        attribute_list = (glcanvas.WX_GL_RGBA,  # RGBA
+                          glcanvas.WX_GL_DOUBLEBUFFER,  # Double Buffered
+                          glcanvas.WX_GL_DEPTH_SIZE, 24)  # 24 bit
+
         # Create the canvas
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.canvas = glcanvas.GLCanvas(self, attribList=attribList)
-
-        if wx.VERSION >= (2, 9):
-            self.context = glcanvas.GLContext(self.canvas)
+        self.canvas = glcanvas.GLCanvas(self, attribList=attribute_list)
+        self.context = glcanvas.GLContext(self.canvas)
 
         self.sizer.Add(self.canvas, 1, wx.EXPAND)
         self.SetSizer(self.sizer)

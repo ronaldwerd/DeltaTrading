@@ -9,6 +9,7 @@
       <w>mongo</w>
       <w>oanda</w>
       <w>pyglet</w>
+      <w>pygletcontext</w>
     </words>
   </dictionary>
 </component>
