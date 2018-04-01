@@ -76,10 +76,7 @@ class PygletGLPanel(wx.Panel):
         pass  # Do nothing, to avoid flashing on MSWin
 
     def processSizeEvent(self, event):
-        if wx.VERSION >= (2, 9):
-            wx.CallAfter(self.doSetViewport)
-        else:
-            self.doSetViewport()
+        wx.CallAfter(self.doSetViewport)
         event.Skip()
 
     def processPaintEvent(self, event):
@@ -91,41 +88,23 @@ class PygletGLPanel(wx.Panel):
         event.Skip()
 
     def doSetViewport(self):
-        if wx.VERSION >= (2, 9):
-            self.Show()
-            self.PrepareGL()
-            # Make sure the frame is shown before calling SetCurrent.
-            self.canvas.SetCurrent(self.context)
-            size = self.GetGLExtents()
-            self.winsize = (size.width, size.height)
-            self.width, self.height = size.width, size.height
-            if self.width < 0:
-                self.width = 1
-            if self.height < 0:
-                self.height = 1
-            self.OnReshape(size.width, size.height)
-            self.canvas.Refresh(False)
-        else:
-            if self.canvas.GetContext():
-                # Make sure the frame is shown before calling SetCurrent.
-                self.Show()
-                self.PrepareGL()
-                self.canvas.SetCurrent()
-                size = self.GetGLExtents()
-                self.winsize = (size.width, size.height)
-                self.width, self.height = size.width, size.height
-                if self.width < 0:
-                    self.width = 1
-                if self.height < 0:
-                    self.height = 1
-                self.OnReshape(size.width, size.height)
-                self.canvas.Refresh(False)
+        self.Show()
+        self.PrepareGL()
+        # Make sure the frame is shown before calling SetCurrent.
+        self.canvas.SetCurrent(self.context)
+        size = self.GetGLExtents()
+        self.winsize = (size.width, size.height)
+        self.width, self.height = size.width, size.height
+        if self.width < 0:
+            self.width = 1
+        if self.height < 0:
+            self.height = 1
+        self.OnReshape(size.width, size.height)
+        self.canvas.Refresh(False)
+
 
     def PrepareGL(self):
-        if wx.VERSION >= (2, 9):
-            self.canvas.SetCurrent(self.context)
-        else:
-            self.canvas.SetCurrent()
+        self.canvas.SetCurrent(self.context)
 
         # initialize OpenGL only if we need to
         if not self.GLinitialized:
